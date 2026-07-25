@@ -4,16 +4,18 @@ node_modules/
 # Environment
 .env
 .env.local
-.env.*.local
+
+# Build outputs
+dist/
+build/
 
 # Logs
-logs
 *.log
 npm-debug.log*
 
-# Build output
-dist/
-build/
+# OS
+.DS_Store
+Thumbs.db
 
 # IDE
 .vscode/
@@ -21,17 +23,11 @@ build/
 *.swp
 *.swo
 
-# OS
-.DS_Store
-Thumbs.db
-
 # Database
 *.sqlite
 *.db
 
-# Test coverage
-coverage/
-
-# Temporary files
+# Temporary
+tmp/
+temp/
 *.tmp
-*.temp
