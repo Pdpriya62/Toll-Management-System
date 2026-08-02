@@ -69,6 +69,22 @@ export async function initSchema() {
       created_at TIMESTAMP DEFAULT NOW()
     );
 
+    CREATE TABLE IF NOT EXISTS blacklist (
+      id SERIAL PRIMARY KEY,
+      vehicle_number VARCHAR(20) UNIQUE NOT NULL,
+      reason TEXT,
+      active BOOLEAN DEFAULT true,
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS exempt_vehicles (
+      id SERIAL PRIMARY KEY,
+      vehicle_number VARCHAR(20) UNIQUE NOT NULL,
+      reason TEXT,
+      active BOOLEAN DEFAULT true,
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+
     CREATE INDEX IF NOT EXISTS idx_transactions_lane_time ON transactions(lane_id, initiated_at);
     CREATE INDEX IF NOT EXISTS idx_transactions_status ON transactions(status);
     CREATE INDEX IF NOT EXISTS idx_audit_log_table_record ON audit_log(table_name, record_id);

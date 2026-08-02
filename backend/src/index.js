@@ -7,6 +7,7 @@ import authRoutes from './routes/auth.js';
 import laneRoutes from './routes/lanes.js';
 import rateRoutes from './routes/rates.js';
 import reportRoutes from './routes/reports.js';
+import vehicleRoutes from './routes/vehicles.js';
 import { initSchema, seedData } from './models/schema.js';
 import { initSocket } from './sockets/lane.js';
 
@@ -22,6 +23,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/lanes', laneRoutes);
 app.use('/api/rates', rateRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/vehicles', vehicleRoutes);
 
 app.get('/health', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
 

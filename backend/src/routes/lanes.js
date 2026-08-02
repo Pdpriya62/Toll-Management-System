@@ -100,4 +100,42 @@ router.get('/:laneId/summary', authMiddleware, async (req, res) => {
   }
 });
 
+router.get('/check/vehicle', authMiddleware, roleMiddleware('operator'), async (req, res) => {
+  try {
+    const { vehicleNumber } = req.query;
+    if (!vehicleNumber) return res.status(400).json({ error: 'vehicleNumber required' });
+
+    const blacklist = await query('SELECT * FROM blacklist WHERE vehicle_number = $1 AND active = true', [vehicleNumber]);
+    const exempt = await query('SELECT * FROM exempt_vehicles WHERE vehicle_number = $1 AND active = true', [vehicleNumber]);
+
+    res.json({
+      vehicleNumber,
+      blacklisted: blacklist.rows.length > 0,
+      blacklistReason: blacklist.rows[0]?.reason,
+      exempt: exempt.rows.length > 0,
+      exemptReason: exempt.rows[0]?.reason,
+    });
+  } catch (err) {
+    console.error('Vehicle check error:', err);
+    res.status(500).json({ error: 'Failed to check vehicle' });
+  }
+});
+
+router.get('/audit/:entityType/:entityId', authMiddleware, roleMiddleware('supervisor'), async (req, res) => {
+  try {
+    const { entityType, entityId } = req.params;
+    const result = await query(
+      `SELECT al.*, u.username FROM audit_log al
+       LEFT JOIN users u ON al.user_id = u.id
+       WHERE al.entity_type = $1 AND al.entity_id = $2
+       ORDER BY al.created_at DESC LIMIT 100`,
+      [entityType, entityId]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Audit log error:', err);
+    res.status(500).json({ error: 'Failed to fetch audit log' });
+  }
+});
+
 export default router;
