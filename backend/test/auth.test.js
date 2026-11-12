@@ -2,6 +2,8 @@ import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import express from 'express';
 
+process.env.JWT_SECRET ??= 'test-secret';
+
 // Fake DB: two users, INSERT echoes back the new row.
 const users = { 1: { id: 1, username: 'sup', role: 'supervisor' }, 2: { id: 2, username: 'op', role: 'operator' } };
 mock.module('../src/config/db.js', {

@@ -14,6 +14,7 @@ Scaled-down build of the Enterprise TMS HLD (`../Enterprise_TMS_High_Level_Desig
 - `docker-compose.yml` — postgres, backend (3001), frontend/nginx (5173), ocr-service (8001).
 
 ## Run
+First copy `.env.example` to `.env` (for compose) and `backend/.env.example` to `backend/.env` (for local backend), then fill in `JWT_SECRET` and `DB_PASSWORD`.
 ```bash
 docker compose up --build          # everything
 # or locally:
@@ -45,7 +46,7 @@ Privacy: real plate numbers are personal data. Keep dataset images out of git, R
 ### P0 — broken / unsafe
 - [x] Merge duplicate schema (`config/init-db.js` deleted; `models/schema.js` now has `users.full_name`, `transactions.updated_at`, `transactions.shift_id`, `shifts`, `audit_log.entity_type/entity_id`, seed users).
 - [x] Lock account creation: public `/register` removed; `GET/POST /api/auth/users` supervisor-only, password min 8 chars. Tests in `backend/test/auth.test.js` (`npm test`).
-- [ ] Move `JWT_SECRET` and DB password to `.env`; fail on startup if missing; rotate (repo is public).
+- [x] `JWT_SECRET` and `DB_PASSWORD` come from `.env` only (`.env.example`, `backend/.env.example`); backend throws on startup if `JWT_SECRET` is missing; compose refuses to start without both. Old hardcoded values remain in git history but are no longer used.
 - [ ] Restrict CORS (`cors()` in `index.js`, `origin: '*'` in `sockets/lane.js`, ocr-service).
 - [x] Add routes the frontend called but backend lacked: `/api/auth/change-password`, `GET/POST /api/auth/users`. (No UI uses them yet — add a user-management page.)
 - [ ] End-to-end smoke run: compose up, login, simulator, transaction to `SETTLED`, dashboard updates.

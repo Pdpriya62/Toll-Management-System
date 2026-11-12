@@ -1,7 +1,9 @@
+import 'dotenv/config';
 import jwt from 'jsonwebtoken';
 import { query } from '../config/db.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'tollease-secret-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) throw new Error('JWT_SECRET is not set (copy .env.example to .env)');
 
 export function generateToken(user) {
   return jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '8h' });
