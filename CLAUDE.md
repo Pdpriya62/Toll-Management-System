@@ -44,10 +44,10 @@ Privacy: real plate numbers are personal data. Keep dataset images out of git, R
 
 ### P0 — broken / unsafe
 - [x] Merge duplicate schema (`config/init-db.js` deleted; `models/schema.js` now has `users.full_name`, `transactions.updated_at`, `transactions.shift_id`, `shifts`, `audit_log.entity_type/entity_id`, seed users).
-- [ ] Lock `POST /api/auth/register` — currently unauthenticated and accepts `role: 'supervisor'`.
+- [x] Lock account creation: public `/register` removed; `GET/POST /api/auth/users` supervisor-only, password min 8 chars. Tests in `backend/test/auth.test.js` (`npm test`).
 - [ ] Move `JWT_SECRET` and DB password to `.env`; fail on startup if missing; rotate (repo is public).
 - [ ] Restrict CORS (`cors()` in `index.js`, `origin: '*'` in `sockets/lane.js`, ocr-service).
-- [ ] Add or remove routes the frontend calls but backend lacks: `/api/auth/change-password`, `GET/POST /api/auth/users`.
+- [x] Add routes the frontend called but backend lacked: `/api/auth/change-password`, `GET/POST /api/auth/users`. (No UI uses them yet — add a user-management page.)
 - [ ] End-to-end smoke run: compose up, login, simulator, transaction to `SETTLED`, dashboard updates.
 
 ### P1 — half-built features
