@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs';
 import { pool, query } from '../config/db.js';
 
 export async function initSchema() {
@@ -23,9 +24,24 @@ export async function initSchema() {
       username VARCHAR(50) UNIQUE NOT NULL,
       password_hash VARCHAR(255) NOT NULL,
       role VARCHAR(20) NOT NULL CHECK (role IN ('operator', 'supervisor')),
+      full_name VARCHAR(100),
       plaza_id INTEGER REFERENCES plazas(id),
       lane_id INTEGER REFERENCES lanes(id),
       created_at TIMESTAMP DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS shifts (
+      id SERIAL PRIMARY KEY,
+      plaza_id INTEGER REFERENCES plazas(id),
+      operator_id INTEGER REFERENCES users(id),
+      lane_id INTEGER REFERENCES lanes(id),
+      declared_cash DECIMAL(12,2) DEFAULT 0,
+      system_cash DECIMAL(12,2) DEFAULT 0,
+      declared_qr DECIMAL(12,2) DEFAULT 0,
+      system_qr DECIMAL(12,2) DEFAULT 0,
+      started_at TIMESTAMP DEFAULT NOW(),
+      ended_at TIMESTAMP,
+      status VARCHAR(20) DEFAULT 'open' CHECK (status IN ('open', 'closed', 'reconciled'))
     );
 
     CREATE TABLE IF NOT EXISTS rate_cards (
@@ -51,17 +67,19 @@ export async function initSchema() {
       evidence_ref VARCHAR(100),
       operator_id INTEGER REFERENCES users(id),
       supervisor_id INTEGER REFERENCES users(id),
+      shift_id INTEGER REFERENCES shifts(id),
       initiated_at TIMESTAMP DEFAULT NOW(),
       validated_at TIMESTAMP,
       authorized_at TIMESTAMP,
       completed_at TIMESTAMP,
-      settled_at TIMESTAMP
+      settled_at TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT NOW()
     );
 
     CREATE TABLE IF NOT EXISTS audit_log (
       id BIGSERIAL PRIMARY KEY,
-      table_name VARCHAR(50) NOT NULL,
-      record_id BIGINT NOT NULL,
+      entity_type VARCHAR(50) NOT NULL,
+      entity_id BIGINT NOT NULL,
       action VARCHAR(20) NOT NULL,
       old_data JSONB,
       new_data JSONB,
@@ -87,7 +105,7 @@ export async function initSchema() {
 
     CREATE INDEX IF NOT EXISTS idx_transactions_lane_time ON transactions(lane_id, initiated_at);
     CREATE INDEX IF NOT EXISTS idx_transactions_status ON transactions(status);
-    CREATE INDEX IF NOT EXISTS idx_audit_log_table_record ON audit_log(table_name, record_id);
+    CREATE INDEX IF NOT EXISTS idx_audit_log_entity ON audit_log(entity_type, entity_id);
   `;
 
   await query(schema);
@@ -112,6 +130,18 @@ export async function seedData() {
     await query(
       `INSERT INTO rate_cards (plaza_id, vehicle_class, fee) VALUES ($1, $2, $3) ON CONFLICT (plaza_id, vehicle_class, effective_from) DO NOTHING`,
       [plazaId, rc.vehicle_class, rc.fee]
+    );
+  }
+
+  // Default logins (dev only): supervisor/admin123, operator/op123
+  const users = [
+    { username: 'supervisor', password: 'admin123', role: 'supervisor', full_name: 'System Supervisor' },
+    { username: 'operator', password: 'op123', role: 'operator', full_name: 'Lane Operator' },
+  ];
+  for (const u of users) {
+    await query(
+      `INSERT INTO users (username, password_hash, role, full_name, plaza_id) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (username) DO NOTHING`,
+      [u.username, await bcrypt.hash(u.password, 10), u.role, u.full_name, plazaId]
     );
   }
 

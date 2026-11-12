@@ -31,3 +31,18 @@ Thumbs.db
 tmp/
 temp/
 *.tmp
+# Environment / secrets
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Datasets and captured evidence (large, licensed, contain real plate numbers)
+datasets/
+evidence/
