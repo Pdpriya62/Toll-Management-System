@@ -16,7 +16,8 @@ dotenv.config();
 const app = express();
 const server = createServer(app);
 
-app.use(cors());
+const corsOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173').split(',');
+app.use(cors({ origin: corsOrigins }));
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
@@ -27,7 +28,7 @@ app.use('/api/vehicles', vehicleRoutes);
 
 app.get('/health', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
 
-initSocket(server);
+initSocket(server, corsOrigins);
 
 const PORT = process.env.PORT || 3001;
 

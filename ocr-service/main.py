@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
 import pytesseract
 import io
+import os
 import re
 import uvicorn
 
@@ -10,7 +11,7 @@ app = FastAPI(title="TollEase OCR Service")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=os.environ.get("CORS_ORIGIN", "http://localhost:5173").split(","),
     allow_methods=["*"],
     allow_headers=["*"],
 )
